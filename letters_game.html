@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة التمييز بين الحروف (د - ت - ض - ط)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .game-container {
+            width: 100%;
+            max-width: 650px;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            border: 4px solid #4facfe;
+            text-align: center;
+        }
+        h1 {
+            color: #2b5876;
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+        
+        /* لوحة النقاط والتقدم */
+        .header-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f0f7ff;
+            padding: 10px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #1e3c72;
+            font-size: 1.1rem;
+        }
+
+        /* صورة/إيموجي الكلمة */
+        .image-box {
+            font-size: 5rem;
+            background: #ffb9e6;
+            width: 130px;
+            height: 130px;
+            line-height: 130px;
+            border-radius: 50%;
+            margin: 0 auto 15px auto;
+            border: 4px dashed #ffe066;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        /* زر النطق المعلم */
+        .audio-btn {
+            background-color: #ff9f43;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 159, 67, 0.3);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .audio-btn:hover { background-color: #ee5253; }
+        .audio-btn:active { transform: scale(0.95); }
+
+        /* أزرار اختيار الحرف */
+        .letters-title {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+        .letters-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .letter-btn {
+            background-color: #00d2d3;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border: none;
+            padding: 12px 0;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #00a8a9;
+            transition: all 0.1s;
+        }
+        .letter-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #00a8a9;
+        }
+        .letter-btn.correct {
+            background-color: #10ac84 !important;
+            box-shadow: 0 5px 0 #0e8365 !important;
+        }
+        .letter-btn.wrong {
+            background-color: #ee5253 !important;
+            box-shadow: 0 5px 0 #c82333 !important;
+        }
+
+        /* منطقة كتابة الكلمة */
+        .write-section {
+            display: none; /* تظهر فقط بعد اختيار الحرف الصحيح */
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+            margin-top: 15px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .write-section label {
+            display: block;
+            font-size: 1.1rem;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .word-input {
+            width: 80%;
+            padding: 10px;
+            font-size: 1.3rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            text-align: center;
+            outline: none;
+            margin-bottom: 12px;
+        }
+        .submit-word-btn {
+            background-color: #54a0ff;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* أزرار التنقل */
+        .next-btn {
+            display: none;
+            background-color: #10ac84;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        /* رسالة النهاية */
+        .end-screen {
+            display: none;
+        }
+        .end-screen h2 { color: #10ac84; font-size: 2rem; }
+    </style>
+</head>
+<body>
+
+    <div class="game-container" id="game-box">
+        <h1>إتقان الحروف (د - ت - ض - ط) 🎯</h1>
+        
+        <div class="header-status">
+            <span>الكلمة: <span id="current-step">1</span> / <span id="total-steps">14</span></span>
+            <span>النقاط: <span id="score">0</span> ⭐</span>
+        </div>
+
+        <div id="play-area">
+            <!-- الصورة -->
+            <div class="image-box" id="word-image">🌴</div>
+
+            <!-- زر ينطق الكلمة -->
+            <button class="audio-btn" onclick="speakWord()">🔊 استمع للكلمة من المعلم</button>
+
+            <!-- خيارات الحروف -->
+            <div class="letters-title">اختر الحرف الصحيح للكلمة:</div>
+            <div class="letters-grid" id="letters-grid">
+                <!-- سيتم إنشاء الأزرار عشوائياً بواسطة JavaScript -->
+            </div>
+
+            <!-- منطقة كتابة الكلمة -->
+            <div class="write-section" id="write-section">
+                <label>ممتاز! الآن اكتب الكلمة كاملة هنا:</label>
+                <input type="text" id="word-input" class="word-input" placeholder="اكتب الكلمة هنا...">
+                <br>
+                <button class="submit-word-btn" onclick="checkWrittenWord()">تأكيد الكلمة</button>
+            </div>
+
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()">الكلمة التالية 👈</button>
+        </div>
+
+        <!-- شاشة إتمام اللعبة -->
+        <div class="end-screen" id="end-screen">
+            <h2>🎉 أحسنت صنعاً يا بطل! 🎉</h2>
+            <p style="font-size: 1.3rem;">لقد أكملت جميع الكلمات بنجاح!</p>
+            <p style="font-size: 1.5rem; font-weight: bold;">مجموع نقاطك: <span id="final-score">0</span></p>
+            <button class="audio-btn" onclick="location.reload()">إعادة اللعب 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // قائمة الكلمات
+        const rawWordList = [
+            // حرف التاء
+            { word: "تمر", letter: "ت", icon: "🌴" },
+            { word: "تسع", letter: "ت", icon: "9️⃣" },
+            { word: "تيجان", letter: "ت", icon: "👑" },
+            
+            // حرف الضاد
+            { word: "ضب", letter: "ض", icon: "🦎" },
+            { word: "ضفدع", letter: "ض", icon: "🐸" },
+            { word: "موضوع", letter: "ض", icon: "📝" },
+            { word: "عضو", letter: "ض", icon: "👤" },
+
+            // حرف الدال
+            { word: "درب", letter: "د", icon: "🛣️" },
+            { word: "دراسة", letter: "د", icon: "📚" },
+            { word: "دب", letter: "د", icon: "🐻" },
+            { word: "دبوس", letter: "د", icon: "📌" },
+
+            // حرف الطاء
+            { word: "طين", letter: "ط", icon: "🧱" },
+            { word: "طوب", letter: "ط", icon: "🧱" },
+            { word: "طبل", letter: "ط", icon: "🥁" }
+        ];
+
+        let wordList = [];
+        let currentIndex = 0;
+        let score = 0;
+        let letterGuessed = false;
+
+        // دالة خلط مصفوفة عشوائياً (Fisher-Yates Shuffle)
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function loadQuestion() {
+            letterGuessed = false;
+            const currentObj = wordList[currentIndex];
+            
+            document.getElementById('current-step').textContent = currentIndex + 1;
+            document.getElementById('total-steps').textContent = wordList.length;
+            document.getElementById('word-image').textContent = currentObj.icon;
+            document.getElementById('write-section').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('word-input').value = '';
+
+            // خلايا الأزرار: خلط ترتيب الحروف أيضاً في كل سؤال
+            const lettersGrid = document.getElementById('letters-grid');
+            lettersGrid.innerHTML = '';
+            const availableLetters = shuffle(['د', 'ت', 'ض', 'ط']);
+
+            availableLetters.forEach(lettr => {
+                const btn = document.createElement('button');
+                btn.className = 'letter-btn';
+                btn.textContent = lettr;
+                btn.onclick = function() { checkLetter(lettr, btn); };
+                lettersGrid.appendChild(btn);
+            });
+        }
+
+        function speakWord() {
+            const currentObj = wordList[currentIndex];
+            const msg = new SpeechSynthesisUtterance(currentObj.word);
+            msg.lang = 'ar-SA';
+            window.speechSynthesis.speak(msg);
+        }
+
+        function checkLetter(selectedLetter, clickedBtn) {
+            if (letterGuessed) return;
+
+            const currentObj = wordList[currentIndex];
+            const buttons = document.querySelectorAll('.letter-btn');
+
+            if (selectedLetter === currentObj.letter) {
+                clickedBtn.classList.add('correct');
+                score += 5;
+                document.getElementById('score').textContent = score;
+                letterGuessed = true;
+                
+                document.getElementById('write-section').style.display = 'block';
+                buttons.forEach(b => b.disabled = true);
+            } else {
+                clickedBtn.classList.add('wrong');
+            }
+        }
+
+        function checkWrittenWord() {
+            const userWord = document.getElementById('word-input').value.trim();
+            const currentObj = wordList[currentIndex];
+
+            if (userWord === currentObj.word) {
+                alert("إجابة ممتازة وكتابة صحيحة! 👏");
+                score += 5;
+                document.getElementById('score').textContent = score;
+                document.getElementById('write-section').style.display = 'none';
+                document.getElementById('next-btn').style.display = 'block';
+            } else {
+                alert(`حاول مرة أخرى! الكلمة الصحيحة هي: (${currentObj.word})`);
+            }
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < wordList.length) {
+                loadQuestion();
+            } else {
+                document.getElementById('play-area').style.display = 'none';
+                document.getElementById('end-screen').style.display = 'block';
+                document.getElementById('final-score').textContent = score;
+            }
+        }
+
+        // عند تحميل اللعبة: يتم خلط الكلمات عشوائياً!
+        window.onload = function() {
+            wordList = shuffle([...rawWordList]);
+            loadQuestion();
+        };
+    </script>
+</body>
+</html>
