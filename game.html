@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة تصنيف المبتدأ والخبر</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        p.subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        /* قسم الجمل الأصلية */
+        .sentences-box {
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 15px 25px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .sentences-box h3 {
+            margin-top: 0;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+        .sentences-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        /* منطقة الإسقاط (المبتدأ والخبر) */
+        .drop-zones-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 25px;
+        }
+        .drop-zone {
+            flex: 1;
+            background-color: #ffffff;
+            border: 3px dashed #94a3b8;
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .drop-zone.hovered {
+            background-color: #e0f2fe;
+            border-color: #0284c7;
+        }
+        .drop-zone h2 {
+            margin-top: 0;
+            color: #0369a1;
+            background-color: #e0f2fe;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 1.3rem;
+        }
+        .drop-zone-content {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-content: flex-start;
+            min-height: 150px;
+        }
+
+        /* بنك الكلمات */
+        .word-bank {
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .word-bank h3 {
+            margin-top: 0;
+            color: #334155;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .words-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            min-height: 80px;
+        }
+
+        /* بطاقات الكلمات */
+        .card {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .card:active {
+            cursor: grabbing;
+        }
+        .card.dragging {
+            opacity: 0.5;
+        }
+        .card.correct {
+            background-color: #22c55e !important;
+        }
+        .card.incorrect {
+            background-color: #ef4444 !important;
+        }
+
+        /* الأزرار والنتائج */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-check {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-check:hover { background-color: #059669; }
+        .btn-reset {
+            background-color: #64748b;
+            color: white;
+        }
+        .btn-reset:hover { background-color: #475569; }
+
+        #result-message {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>لعبة تصنيف المبتدأ والخبر</h1>
+    <p class="subtitle">اسحب كل كلمة من المستطيل بالأسفل وضَعها في مكانها الصحيح (المبتدأ أو الخبر)</p>
+
+    <!-- الجمل في الأعلى -->
+    <div class="sentences-box">
+        <h3>الجمل الأساسية:</h3>
+        <div class="sentences-grid">
+            <div>( أ ) مُحَمَّدٌ مُسَافِرٌ.</div>
+            <div>(ب) الْمَلِكُ مَحْبُوبٌ.</div>
+            <div>(ج) الْقَاضِي عَادِلٌ.</div>
+            <div>(د) الصَّرَّافُ أَمِينٌ.</div>
+            <div>(هـ) الْجُنْدِيُّ شُجَاعٌ.</div>
+            <div>( و ) الزَّجَّاجُ مَاهِرٌ.</div>
+        </div>
+    </div>
+
+    <!-- خانات الإسقاط -->
+    <div class="drop-zones-container">
+        <div class="drop-zone" id="zone-mubtada">
+            <h2>المبتدأ</h2>
+            <div class="drop-zone-content"></div>
+        </div>
+        <div class="drop-zone" id="zone-khabar">
+            <h2>الخبر</h2>
+            <div class="drop-zone-content"></div>
+        </div>
+    </div>
+
+    <!-- المستطيل في الأسفل (بنك الكلمات المفككة) -->
+    <div class="word-bank">
+        <h3>الكلمات المفككة (اسحب من هنا)</h3>
+        <div class="words-container" id="word-bank-content"></div>
+    </div>
+
+    <!-- الأزرار -->
+    <div class="controls">
+        <button class="btn-check" onclick="checkAnswers()">تحقق من الإجابة</button>
+        <button class="btn-reset" onclick="initGame()">إعادة اللعبة</button>
+    </div>
+
+    <div id="result-message"></div>
+
+    <script>
+        // بيانات الكلمات وتصنيفها الصحيح
+        const wordsData = [
+            { id: 1, text: "مُحَمَّدٌ", type: "mubtada" },
+            { id: 2, text: "مُسَافِرٌ", type: "khabar" },
+            { id: 3, text: "الْمَلِكُ", type: "mubtada" },
+            { id: 4, text: "مَحْبُوبٌ", type: "khabar" },
+            { id: 5, text: "الْقَاضِي", type: "mubtada" },
+            { id: 6, text: "عَادِلٌ", type: "khabar" },
+            { id: 7, text: "الصَّرَّافُ", type: "mubtada" },
+            { id: 8, text: "أَمِينٌ", type: "khabar" },
+            { id: 9, text: "الْجُنْدِيُّ", type: "mubtada" },
+            { id: 10, text: "شُجَاعٌ", type: "khabar" },
+            { id: 11, text: "الزَّجَّاجُ", type: "mubtada" },
+            { id: 12, text: "مَاهِرٌ", type: "khabar" }
+        ];
+
+        let draggedElement = null;
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function initGame() {
+            const wordBank = document.getElementById('word-bank-content');
+            const mubtadaZone = document.querySelector('#zone-mubtada .drop-zone-content');
+            const khabarZone = document.querySelector('#zone-khabar .drop-zone-content');
+            const resultMsg = document.getElementById('result-message');
+
+            wordBank.innerHTML = '';
+            mubtadaZone.innerHTML = '';
+            khabarZone.innerHTML = '';
+            resultMsg.textContent = '';
+
+            // خلط الكلمات عشوائياً
+            const shuffledWords = shuffle([...wordsData]);
+
+            shuffledWords.forEach(word => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.textContent = word.text;
+                card.setAttribute('draggable', 'true');
+                card.dataset.type = word.type;
+                card.dataset.id = word.id;
+
+                // أحداث السحب
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+
+                wordBank.appendChild(card);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', '');
+        }
+
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            draggedElement = null;
+        }
+
+        // إعداد مناطق الإسقاط (المبتدأ، الخبر، وبنك الكلمات أيضاً لإرجاع الكلمة)
+        const dropContainers = [
+            document.querySelector('#zone-mubtada .drop-zone-content'),
+            document.querySelector('#zone-khabar .drop-zone-content'),
+            document.getElementById('word-bank-content')
+        ];
+
+        dropContainers.forEach(container => {
+            const parentZone = container.closest('.drop-zone') || container;
+
+            parentZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                parentZone.classList.add('hovered');
+            });
+
+            parentZone.addEventListener('dragleave', () => {
+                parentZone.classList.remove('hovered');
+            });
+
+            parentZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                parentZone.classList.remove('hovered');
+                if (draggedElement) {
+                    container.appendChild(draggedElement);
+                    // إعادة تعيين الألوان في حال تم التحقق سابقاً
+                    draggedElement.classList.remove('correct', 'incorrect');
+                }
+            });
+        });
+
+        function checkAnswers() {
+            const mubtadaCards = document.querySelectorAll('#zone-mubtada .card');
+            const khabarCards = document.querySelectorAll('#zone-khabar .card');
+            const totalInBank = document.querySelectorAll('#word-bank-content .card').length;
+            const resultMsg = document.getElementById('result-message');
+
+            if (totalInBank > 0) {
+                resultMsg.style.color = '#eab308';
+                resultMsg.textContent = '⚠️ يُرجى سحب جميع الكلمات إلى الخانات قبل التحقق!';
+                return;
+            }
+
+            let correctCount = 0;
+            const totalWords = wordsData.length;
+
+            mubtadaCards.forEach(card => {
+                if (card.dataset.type === 'mubtada') {
+                    card.classList.add('correct');
+                    card.classList.remove('incorrect');
+                    correctCount++;
+                } else {
+                    card.classList.add('incorrect');
+                    card.classList.remove('correct');
+                }
+            });
+
+            khabarCards.forEach(card => {
+                if (card.dataset.type === 'khabar') {
+                    card.classList.add('correct');
+                    card.classList.remove('incorrect');
+                    correctCount++;
+                } else {
+                    card.classList.add('incorrect');
+                    card.classList.remove('correct');
+                }
+            });
+
+            if (correctCount === totalWords) {
+                resultMsg.style.color = '#16a34a';
+                resultMsg.textContent = `🎉 أحسنت! جميع الإجابات صحيحة (${correctCount}/${totalWords}).`;
+            } else {
+                resultMsg.style.color = '#dc2626';
+                resultMsg.textContent = `❌ لديك بعض الأخطاء. الإجابات الصحيحة: ${correctCount} من ${totalWords}. حاول مرة أخرى!`;
+            }
+        }
+
+        // تشغيل اللعبة عند التحميل
+        window.onload = initGame;
+    </script>
+</body>
+</html>
