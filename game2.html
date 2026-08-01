@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تمرين تحويل الفاعل إلى مبتدأ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #a8edd8 0%, #fed6e3 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .main-container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* الهيدر والتعليمات */
+        header {
+            background-color: #ffffff;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 3px solid #ffb7b2;
+        }
+        h1 {
+            color: #ff6b6b;
+            margin-top: 0;
+            font-size: 1.8rem;
+        }
+        .instruction {
+            font-size: 1.2rem;
+            color: #4a4a4a;
+            background-color: #fff9e6;
+            padding: 12px;
+            border-radius: 12px;
+            border-right: 5px solid #ffd166;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        /* لوحة النقاط */
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            background-color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .score-item {
+            color: #2b2d42;
+        }
+        .score-number {
+            color: #06d6a0;
+            font-size: 1.4rem;
+        }
+
+        /* بطاقات الأسئلة */
+        .question-card {
+            background-color: #ffffff;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            transition: transform 0.2s, border-color 0.3s;
+            border: 3px solid transparent;
+        }
+        .question-card:hover {
+            transform: translateY(-2px);
+        }
+        .question-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #1d3557;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .q-number {
+            background-color: #457b9d;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        /* منطقة كتابة الطالب */
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .answer-input {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1.2rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .answer-input:focus {
+            border-color: #457b9d;
+        }
+
+        /* لوحة تصحيح المعلم */
+        .teacher-panel {
+            background-color: #f8fafc;
+            border-top: 2px dashed #e2e8f0;
+            padding-top: 15px;
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .teacher-label {
+            font-size: 0.95rem;
+            color: #64748b;
+            font-weight: bold;
+        }
+        .buttons-group {
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            flex: 1;
+            padding: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            color: white;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn-correct {
+            background-color: #06d6a0;
+        }
+        .btn-correct:hover {
+            background-color: #05b888;
+        }
+        .btn-incorrect {
+            background-color: #ef476f;
+        }
+        .btn-incorrect:hover {
+            background-color: #d63d60;
+        }
+
+        /* حالات البطاقة بعد التصحيح */
+        .status-correct {
+            border-color: #06d6a0 !important;
+            background-color: #f0fdf4;
+        }
+        .status-incorrect {
+            border-color: #ef476f !important;
+            background-color: #fef2f2;
+        }
+        
+        .status-badge {
+            margin-top: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .text-correct { color: #06d6a0; }
+        .text-incorrect { color: #ef476f; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <header>
+            <h1>🌟 لعبة تحويل الجملة الفعلية إلى اسمية 🌟</h1>
+            <div class="instruction">
+                <strong>السؤال:</strong> اجْعَلْ كُلَّ فَاعِلٍ فِي الجُمَلِ الآتِيَةِ مُبْتَدَأً وَأَخْبِرْ عَنْهُ بِاسْمٍ يُؤَدِّي مَعْنَى الفِعْلِ الَّذِي فِي جُمْلَتِهِ.
+            </div>
+        </header>
+
+        <!-- لوحة النتيجة -->
+        <div class="score-board">
+            <div class="score-item">الدرجة: <span id="score" class="score-number">0</span> / 6</div>
+            <div class="score-item">تم تصحيحه: <span id="evaluated" class="score-number">0</span> / 6</div>
+        </div>
+
+        <!-- قائمة الأسئلة -->
+        <div id="questions-container"></div>
+    </div>
+
+    <script>
+        // بيانات الجمل الست من الصورة
+        const questionsData = [
+            { id: 1, sentence: "يَفْتَرِسُ النَّمِرُ." },
+            { id: 2, sentence: "يَحْضُرُ المُسَافِرُ." },
+            { id: 3, sentence: "يَسْبَحُ السَّمَكُ." },
+            { id: 4, sentence: "تَنْضَجُ الفَاكِهَةُ." },
+            { id: 5, sentence: "يَشْتَدُّ الحَرُّ." },
+            { id: 6, sentence: "يَنْدَمُ الكَسْلاَنُ." }
+        ];
+
+        let scores = {}; // لتخزين نتيجة كل سؤال (1 للصح، 0 للخطأ)
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+
+            questionsData.forEach((q) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `card-${q.id}`;
+
+                card.innerHTML = `
+                    <div class="question-title">
+                        <span class="q-number">${q.id}</span>
+                        <span>الجملة الأصلية: <strong>${q.sentence}</strong></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="input-${q.id}">إجابة الطالب:</label>
+                        <input type="text" id="input-${q.id}" class="answer-input" placeholder="اكتب الجملة الجديدة هنا...">
+                    </div>
+
+                    <div class="teacher-panel">
+                        <div class="teacher-label">👨‍🏫 منطقة تصحيح المعلم:</div>
+                        <div class="buttons-group">
+                            <button class="btn btn-correct" onclick="evaluateAnswer(${q.id}, true)">إجابة صحيحة</button>
+                            <button class="btn btn-incorrect" onclick="evaluateAnswer(${q.id}, false)">إجابة خاطئة</button>
+                        </div>
+                        <div id="badge-${q.id}" class="status-badge"></div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function evaluateAnswer(qId, isCorrect) {
+            const card = document.getElementById(`card-${qId}`);
+            const badge = document.getElementById(`badge-${qId}`);
+
+            // تحديث تصميم البطاقة
+            if (isCorrect) {
+                card.className = 'question-card status-correct';
+                badge.className = 'status-badge text-correct';
+                badge.textContent = '✓ تم الاعتماد: إجابة صحيحة';
+                scores[qId] = 1;
+            } else {
+                card.className = 'question-card status-incorrect';
+                badge.className = 'status-badge text-incorrect';
+                badge.textContent = '✗ تم الاعتماد: إجابة خاطئة';
+                scores[qId] = 0;
+            }
+
+            updateScoreBoard();
+        }
+
+        function updateScoreBoard() {
+            const evaluatedCount = Object.keys(scores).length;
+            let currentScore = 0;
+            
+            for (let id in scores) {
+                currentScore += scores[id];
+            }
+
+            document.getElementById('score').textContent = currentScore;
+            document.getElementById('evaluated').textContent = evaluatedCount;
+        }
+
+        // تشغيل اللعبة عند فتح الصفحة
+        window.onload = renderQuestions;
+    </script>
+</body>
+</html>
