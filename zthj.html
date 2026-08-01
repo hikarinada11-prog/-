@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة تمييز الحروف (ز - ذ - ظ)</title>
+    <style>
+        :root {
+            --primary: #8e44ad;
+            --primary-hover: #732d91;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --background: #f3e5f5;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            text-align: center;
+            border: 4px solid #ba68c8;
+        }
+
+        h1 {
+            color: #4a148c;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f3e5f5;
+            padding: 10px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .progress {
+            font-size: 1.1rem;
+            color: #6a1b9a;
+            font-weight: bold;
+        }
+
+        .score-board {
+            font-size: 1.2rem;
+            color: #27ae60;
+            font-weight: bold;
+            background-color: #e8f8f5;
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 2px solid #2ecc71;
+        }
+
+        /* أزرار التنقل بين الأسئلة */
+        .navigation-bar {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .nav-btn {
+            background-color: #ce93d8;
+            color: #4a148c;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .nav-btn:disabled {
+            background-color: #e0e0e0;
+            color: #9e9e9e;
+            cursor: not-allowed;
+        }
+
+        .image-card {
+            background-color: #f3e5f5;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .image-card img {
+            max-width: 220px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        .audio-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.05);
+            background-color: var(--primary-hover);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #ce93d8;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4a148c;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background-color: #f3e5f5;
+        }
+
+        .option-btn.correct {
+            background-color: var(--success) !important;
+            color: white;
+            border-color: var(--success) !important;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--error) !important;
+            color: white;
+            border-color: var(--error) !important;
+        }
+
+        .write-section {
+            display: none;
+            margin-top: 20px;
+            border-top: 2px dashed #ce93d8;
+            padding-top: 20px;
+        }
+
+        .write-section input {
+            width: 80%;
+            padding: 12px;
+            font-size: 1.2rem;
+            border: 2px solid #ab47bc;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        .submit-btn {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .restart-btn {
+            display: none;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>🎮 لعبة تمييز الحروف (ز - ذ - ظ)</h1>
+    
+    <!-- أزرار التنقل والتقدم والنقاط -->
+    <div class="navigation-bar">
+        <button id="prev-btn" class="nav-btn" onclick="prevQuestion()">⬅️ السؤال السابق</button>
+        <button id="next-btn" class="nav-btn" onclick="nextQuestion()">السؤال التالي ➡️</button>
+    </div>
+    
+    <div class="header-info">
+        <div class="progress" id="progress">السؤال 1 من 11</div>
+        <div class="score-board">⭐ النقاط: <span id="score">0</span></div>
+    </div>
+
+    <div id="game-body">
+        <div class="image-card">
+            <img id="word-image" src="" alt="صورة الكلمة">
+        </div>
+
+        <button class="audio-btn" onclick="speakWord()">🔊 استمع للكلمة</button>
+
+        <div class="options-grid" id="options-container">
+            <!-- أزرار الخيارات -->
+        </div>
+
+        <div class="write-section" id="write-section">
+            <p style="font-weight: bold; color: #4a148c;">أحسنت! الآن اكتب الكلمة كاملة:</p>
+            <input type="text" id="word-input" placeholder="اكتب الكلمة هنا...">
+            <br>
+            <button class="submit-btn" onclick="checkSpelling()">تأكيد الكتابة</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <button class="restart-btn" id="restart-btn" onclick="startGame()">إعادة اللعبة 🔄</button>
+</div>
+
+<script>
+    const wordsData = [
+        { word: "زُجَاج", letter: "ز", image: "https://tse3.mm.bing.net/th/id/OIP.CpaVoOFfjlgMiiHjO59YQwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+        { word: "ذَيْل", letter: "ذ", image: "https://i.pinimg.com/736x/73/da/e8/73dae8b90a47534bfb8b7a5fe79a6b97.jpg" },
+        { word: "ذِئْب", letter: "ذ", image: "https://th.bing.com/th/id/OSK.HERO5Vmdh-gnbCOwnZPM1tVi88PBDpy-CLOeZRMgvURK0fE?r=0&o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3" },
+        { word: "ذُبَاب", letter: "ذ", image: "https://tse1.mm.bing.net/th/id/OIP.DVO3ze_KE0TiHk6T_tuqVwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+        { word: "زَئِير", letter: "ز", image: "https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?w=400&auto=format&fit=crop&q=80" },
+        { word: "ظُفْر", letter: "ظ", image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&auto=format&fit=crop&q=80" },
+        { word: "ظَرْف", letter: "ظ", image: "https://www.theenvelopepeople.co.uk/wp-content/uploads/2024/02/C6-vanilla_Envelope_Flap.jpg" },
+        { word: "ظَبْي", letter: "ظ", image: "https://images.unsplash.com/photo-1484406566174-9da000fda645?w=400&auto=format&fit=crop&q=80" },
+        { word: "زِمَام", letter: "ز", image: "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400&auto=format&fit=crop&q=80" },
+        { word: "ظِلّ", letter: "ظ", image: "https://tse2.mm.bing.net/th/id/OIP.4KylCLPoLyx8gerFv18JHAHaE8?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" },
+        { word: "زِلْزَال", letter: "ز", image: "https://cdn.vectorstock.com/i/preview-1x/07/90/cartoon-earthquake-natural-disaster-earth-crust-vector-45240790.jpg" }
+    ];
+
+    const allLetters = ["ز", "ذ", "ظ"];
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let attemptsCount = 0; // لضمان احتساب نقاط اختيار الحرف من المحاولة الأولى فقط
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startGame() {
+        currentQuestions = shuffle([...wordsData]);
+        currentIndex = 0;
+        score = 0;
+        updateScore(0);
+        document.getElementById("game-body").style.display = "block";
+        document.querySelector(".navigation-bar").style.display = "flex";
+        document.querySelector(".header-info").style.display = "flex";
+        document.getElementById("restart-btn").style.display = "none";
+        loadQuestion();
+    }
+
+    function updateScore(points) {
+        score += points;
+        document.getElementById("score").innerText = score;
+    }
+
+    function loadQuestion() {
+        attemptsCount = 0;
+        const q = currentQuestions[currentIndex];
+        document.getElementById("progress").innerText = `السؤال ${currentIndex + 1} من ${currentQuestions.length}`;
+        
+        // تحديث حالة أزرار التنقل
+        document.getElementById("prev-btn").disabled = (currentIndex === 0);
+        document.getElementById("next-btn").disabled = (currentIndex === currentQuestions.length - 1);
+
+        const imgElement = document.getElementById("word-image");
+        imgElement.src = q.image;
+        
+        imgElement.onerror = function() {
+            this.src = `https://via.placeholder.com/200x200/8e44ad/ffffff?text=${encodeURIComponent(q.word)}`;
+        };
+
+        document.getElementById("write-section").style.display = "none";
+        document.getElementById("word-input").value = "";
+        document.getElementById("feedback").innerText = "";
+
+        const optionsContainer = document.getElementById("options-container");
+        optionsContainer.innerHTML = "";
+        const shuffledLetters = shuffle([...allLetters]);
+
+        shuffledLetters.forEach(letter => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerText = letter;
+            btn.onclick = () => checkLetter(btn, letter, q.letter);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        if (currentIndex < currentQuestions.length - 1) {
+            currentIndex++;
+            loadQuestion();
+        }
+    }
+
+    function speakWord() {
+        const word = currentQuestions[currentIndex].word;
+        const cleanWord = word.replace(/[\u064B-\u0652]/g, ""); 
+        const utterance = new SpeechSynthesisUtterance(cleanWord);
+        utterance.lang = "ar-SA";
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function checkLetter(btn, selected, correct) {
+        const buttons = document.querySelectorAll(".option-btn");
+        buttons.forEach(b => b.disabled = true);
+        attemptsCount++;
+
+        if (selected === correct) {
+            btn.classList.add("correct");
+            
+            // منح 5 نقاط إذا تم اختيار الحرف من المحاولة الأولى
+            if (attemptsCount === 1) {
+                updateScore(5);
+                document.getElementById("feedback").innerText = "إجابة صحيحة! (+5 نقاط) 🎉";
+            } else {
+                document.getElementById("feedback").innerText = "إجابة صحيحة! أحسنت 🎉";
+            }
+            
+            document.getElementById("feedback").style.color = "var(--success)";
+            
+            setTimeout(() => {
+                document.getElementById("write-section").style.display = "block";
+                document.getElementById("word-input").focus();
+            }, 400);
+        } else {
+            btn.classList.add("wrong");
+            document.getElementById("feedback").innerText = "حاول مرة أخرى! ❌";
+            document.getElementById("feedback").style.color = "var(--error)";
+            setTimeout(() => {
+                buttons.forEach(b => {
+                    b.disabled = false;
+                    b.classList.remove("wrong");
+                });
+            }, 1000);
+        }
+    }
+
+    function checkSpelling() {
+        const input = document.getElementById("word-input").value.trim();
+        const correctWord = currentQuestions[currentIndex].word;
+        
+        const normalize = (str) => str.replace(/[\u064B-\u0652]/g, "").replace(/[أإآ]/g, "ا");
+
+        if (normalize(input) === normalize(correctWord)) {
+            updateScore(5); // منح 5 نقاط عند كتابة الكلمة بنجاح
+            document.getElementById("feedback").innerText = "ممتاز! كتابة صحيحة (+5 نقاط) 👏";
+            document.getElementById("feedback").style.color = "var(--success)";
+            
+            setTimeout(() => {
+                if (currentIndex < currentQuestions.length - 1) {
+                    currentIndex++;
+                    loadQuestion();
+                } else {
+                    showEndGame();
+                }
+            }, 1200);
+        } else {
+            document.getElementById("feedback").innerText = "هناك خطأ في الكتابة، حاول مجددًا!";
+            document.getElementById("feedback").style.color = "var(--error)";
+        }
+    }
+
+    function showEndGame() {
+        document.getElementById("game-body").style.display = "none";
+        document.querySelector(".navigation-bar").style.display = "none";
+        
+        const maxScore = wordsData.length * 10;
+        let evaluation = "رائع جدًا! بطل الحروف ⭐";
+        if (score < maxScore * 0.5) evaluation = " محاولة جيدة! واصل التدريب 💪";
+        else if (score < maxScore * 0.8) evaluation = " ممتاز! أداء رائع جداً 👍";
+
+        document.getElementById("progress").innerHTML = `
+            🎉 أنهيت جميع الأسئلة بنجاح! 🎉<br><br>
+            <span style="font-size: 1.5rem; color: #27ae60;">مجموع نقاطك: ${score} من ${maxScore}</span><br>
+            <span style="font-size: 1.2rem; color: #8e44ad;">${evaluation}</span>
+        `;
+        document.getElementById("restart-btn").style.display = "inline-block";
+    }
+
+    window.onload = startGame;
+</script>
+
+</body>
+</html>
